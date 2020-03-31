@@ -18,7 +18,7 @@ Resources:
     JumpBoxSecGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
-            GroupDescription: Jump Box / For accessing servers on private subnet. Only open port is 22 for SSH.
+            GroupDescription: Jump Box / For accessing servers on private subnet. Only allow Port 22 for SSH on ingress. Allow all egress for updating.
             VpcId:
                 Fn::ImportValue:
                     !Sub "${EnvironmentName}-VPCID"
@@ -32,6 +32,10 @@ Resources:
                 FromPort: 22
                 ToPort: 22
                 CidrIp: !Ref JumpBoxAllowedCidr
+              - IpProtocol: tcp
+                FromPort: 0
+                ToPort: 65535
+                CidrIp: 0.0.0.0/0
 
     LBSecGroup:
         Type: AWS::EC2::SecurityGroup
@@ -91,6 +95,9 @@ Resources:
               - DeviceName: "/dev/sdk"
                 Ebs:
                     VolumeSize: '10'
+            Tags:
+              - Key: Name
+                Value: JumpBox
             UserData:
                 Fn::Base64: !Sub |
                     #!/bin/bash
