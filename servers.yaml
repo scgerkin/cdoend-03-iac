@@ -9,6 +9,9 @@ Parameters:
     JumpBoxAllowedCidr:
         Description: The IP address allowed to SSH into a Jump Box EC2 instance running within a public subnet allowing access to servers in a private subnet.
         Type: String
+    ImageId:
+        Description: Fully qualified ami image id.
+        Type: String
 
 Resources:
 ### SECURITY GROUPS ###
@@ -29,7 +32,7 @@ Resources:
                 FromPort: 22
                 ToPort: 22
                 CidrIp: !Ref JumpBoxAllowedCidr
-                
+
     LBSecGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
@@ -69,3 +72,26 @@ Resources:
                 FromPort: 0
                 ToPort: 65535
                 CidrIp: 0.0.0.0/0
+
+### JUMP BOX INSTANCE ###
+    JumpBoxInstance:
+        Type: AWS::EC2::Instance
+        Properties:
+            InstanceType: t2.micro
+            ImageId: !Ref ImageId
+            SubnetId:
+                Fn::ImportValue:
+                    !Sub "${EnvironmentName}-PUB1-SN"
+            KeyName: jumpbox-key
+            SecurityGroupIds:
+              - Ref: JumpBoxSecGroup
+            IamInstanceProfile: Udagram-EC2-S3-ReadOnly
+            InstanceInitiatedShutdownBehavior: "stop"
+            BlockDeviceMappings:
+              - DeviceName: "/dev/sdk"
+                Ebs:
+                    VolumeSize: '10'
+            UserData:
+                Fn::Base64: !Sub |
+                    #!/bin/bash
+                    apt-get update -y
