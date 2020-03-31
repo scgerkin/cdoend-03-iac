@@ -1,0 +1,24 @@
+{
+    "Version": "2012-10-17",
+    "Id": "Policy1585686435404",
+    "Statement": [
+        {
+            "Sid": "Stmt1585686428428",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::854235326474:role/Udagram-EC2-S3-ReadOnly"
+            },
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::udagram-test-environment"
+        },
+        {
+            "Sid": "Stmt1585686428428",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::854235326474:role/Udagram-EC2-S3-ReadOnly"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::udagram-test-environment/*"
+        }
+    ]
+}
