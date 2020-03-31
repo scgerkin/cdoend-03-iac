@@ -199,3 +199,10 @@ Resources:
             VpcId:
                 Fn::ImportValue:
                     Fn::Sub: "${EnvironmentName}-VPCID"
+
+Outputs:
+    LoadBalancerDnsName:
+        Description: The DNS name created for the load balancer. Routing should resolve to this.
+        Value: !Join ["", ["http://", !GetAtt WebServerLB.DNSName]]
+        Export:
+            Name: !Sub "${EnvironmentName}-LBDNS"
