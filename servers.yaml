@@ -106,3 +106,88 @@ Resources:
                     aws s3 cp s3://udagram-test-environment/keys/private-server-devops-key.pem private-server-devops-key.pem
                     chmod 400 private-server-devops-key.pem
                     chown ec2-user private-server-devops-key.pem
+
+### AUTO-SCALING WEB SERVERS & LOAD BALANCER ###
+    WebServerLaunchConfig:
+        Type: AWS::AutoScaling::LaunchConfiguration
+        Properties:
+            ImageId: !Ref WebServerImageId
+            SecurityGroups:
+              - Ref: WebServerSecGroup
+            IamInstanceProfile: Udagram-EC2-S3-ReadOnly
+            InstanceType: t2.micro  #/fixme set to t3.small or better after testing
+            KeyName: private-server-devops-key  #/fixme remove after testing
+            UserData:
+                Fn::Base64: !Sub |
+                  #!/bin/bash
+                  apt-get update -y
+                  apt-get upgrade -y
+                  apt install apache2 -y
+                  apt systemctl start apache2.service
+                  cd /var/www/html
+                  echo "Udagram up and running!" > index.html
+
+    WebServerGroup:
+        Type: AWS::AutoScaling::AutoScalingGroup
+        Properties:
+            VPCZoneIdentifier:
+              - Fn::ImportValue:
+                    !Sub "${EnvironmentName}-PRIV-NETS"
+            LaunchConfigurationName:
+                Ref: WebServerLaunchConfig
+            MinSize: '2'
+            MaxSize: '6'
+            TargetGroupARNs:
+              - Ref: WebServerTargetGroup
+
+    WebServerLB:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties:
+            Subnets:
+              - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
+              - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
+            SecurityGroups:
+              - Ref: LBSecGroup
+
+### LB LISTENERS ###
+    LBListener:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            LoadBalancerArn: !Ref WebServerLB
+            DefaultActions:
+              - Type: forward
+                TargetGroupArn:
+                    Ref: WebServerTargetGroup
+            Port: '80'
+            Protocol: HTTP
+
+    LBListenerRule:
+        Type: AWS::ElasticLoadBalancingV2::ListenerRule
+        Properties:
+            Actions:
+              - Type: forward
+                TargetGroupArn: !Ref 'WebServerTargetGroup'
+            Conditions:
+              - Field: path-pattern
+                Values: [/]
+            ListenerArn: !Ref LBListener
+            Priority: 1
+
+### TARGET GROUP: HEALTH QUALIFIERS ###
+    WebServerTargetGroup:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        Properties:
+            TargetGroupAttributes:
+              - Key: slow_start.duration_seconds
+                Value: 120
+            HealthCheckIntervalSeconds: 10
+            HealthCheckPath: /
+            HealthCheckProtocol: HTTP
+            HealthCheckTimeoutSeconds: 8
+            HealthyThresholdCount: 2
+            Port: 80
+            Protocol: HTTP
+            UnhealthyThresholdCount: 5
+            VpcId:
+                Fn::ImportValue:
+                    Fn::Sub: "${EnvironmentName}-VPCID"
