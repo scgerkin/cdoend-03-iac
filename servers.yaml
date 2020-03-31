@@ -9,7 +9,7 @@ Parameters:
     JumpBoxAllowedCidr:
         Description: The IP address allowed to SSH into a Jump Box EC2 instance running within a public subnet allowing access to servers in a private subnet.
         Type: String
-    ImageId:
+    WebServerImageId:
         Description: Fully qualified ami image id.
         Type: String
 
@@ -82,7 +82,7 @@ Resources:
         Type: AWS::EC2::Instance
         Properties:
             InstanceType: t2.micro
-            ImageId: !Ref ImageId
+            ImageId: ami-0ce21b51cb31a48b8 # Amazon Linux 2 AMI 64-Bit x86
             SubnetId:
                 Fn::ImportValue:
                     !Sub "${EnvironmentName}-PUB1-SN"
@@ -101,4 +101,8 @@ Resources:
             UserData:
                 Fn::Base64: !Sub |
                     #!/bin/bash
-                    apt-get update -y
+                    yum update -y
+                    cd /home/ec2-user
+                    aws s3 cp s3://udagram-test-environment/keys/private-server-devops-key.pem private-server-devops-key.pem
+                    chmod 400 private-server-devops-key.pem
+                    chown ec2-user private-server-devops-key.pem

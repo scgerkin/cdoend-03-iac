@@ -8,7 +8,7 @@
         "ParameterValue": "71.56.93.71/32"
     },
     {
-        "ParameterKey": "ImageId",
+        "ParameterKey": "WebServerImageId",
         "ParameterValue": "ami-0d1cd67c26f5fca19",
         "ResolvedValue": "Ubuntu Server 18.04 LTS"
     }
