@@ -124,8 +124,16 @@ Resources:
                   apt-get upgrade -y
                   apt install apache2 -y
                   apt systemctl start apache2.service
-                  cd /var/www/html
-                  echo "Udagram up and running!" > index.html
+                  apt install awscli -y
+                  apt install unzip -y
+                  cd /var/www
+                  rm -rf html
+                  mkdir html
+                  cd html
+                  aws s3 cp s3://udagram-test-environment/udagram.zip udagram.zip
+                  unzip udagram.zip
+                  rm udagram.zip
+                  chown -R ubuntu *
 
     WebServerGroup:
         Type: AWS::AutoScaling::AutoScalingGroup
