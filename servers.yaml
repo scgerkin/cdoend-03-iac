@@ -1,0 +1,71 @@
+Description: >
+    Server Infrastructure / UdagramTestEnvironment /
+
+Parameters:
+    # NOTE: All IP ranges should be written in CIDR notation (#.#.#.#/#)
+    EnvironmentName:
+        Description: Environment name to be prefixed to resource names.
+        Type: String
+    JumpBoxAllowedCidr:
+        Description: The IP address allowed to SSH into a Jump Box EC2 instance running within a public subnet allowing access to servers in a private subnet.
+        Type: String
+
+Resources:
+### SECURITY GROUPS ###
+    JumpBoxSecGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Jump Box / For accessing servers on private subnet. Only open port is 22 for SSH.
+            VpcId:
+                Fn::ImportValue:
+                    !Sub "${EnvironmentName}-VPCID"
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 22
+                ToPort: 22
+                CidrIp: !Ref JumpBoxAllowedCidr
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 22
+                ToPort: 22
+                CidrIp: !Ref JumpBoxAllowedCidr
+                
+    LBSecGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Load Balancer / Allow all TCP on port 80 (HTTP) for ingress and egress.
+            VpcId:
+                Fn::ImportValue:
+                    !Sub "${EnvironmentName}-VPCID"
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 0.0.0.0/0
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 0.0.0.0/0
+
+    WebServerSecGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow HTTP and SSH on Network only, Any Outbound traffic.
+            VpcId:
+                Fn::ImportValue:
+                    !Sub "${EnvironmentName}-VPCID"
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 10.0.0.0/24
+              - IpProtocol: tcp
+                FromPort: 22
+                ToPort: 22
+                CidrIp: 10.0.0.0/24
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 0
+                ToPort: 65535
+                CidrIp: 0.0.0.0/0
