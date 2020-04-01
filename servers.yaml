@@ -125,7 +125,7 @@ Resources:
                     VolumeSize: 10
                     VolumeType: gp2
     # Uncomment this to enable SSH into WebServer instances from JumpBox
-            KeyName: private-server-devops-key
+            #KeyName: private-server-devops-key
             UserData:
                 Fn::Base64: !Sub |
                     #!/bin/bash
