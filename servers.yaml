@@ -140,7 +140,7 @@ Resources:
                     cd html
                     aws s3 cp s3://udagram-test-environment/udagram.zip udagram.zip
                     unzip udagram.zip
-                    rm udagram.zip
+                    rm -f udagram.zip
                     chown -R ubuntu *
 
     WebServerGroup:
