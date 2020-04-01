@@ -1,5 +1,7 @@
 Description: >
     Server Infrastructure / UdagramTestEnvironment /
+    Contains AutoScalingGroup of 2+ web servers hosting Udagram.
+    JumpBox is also provided for access to private network.
 
 Parameters:
     # NOTE: All IP ranges should be written in CIDR notation (#.#.#.#/#)
