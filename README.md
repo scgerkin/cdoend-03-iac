@@ -1,6 +1,6 @@
 # Udacity - Cloud DevOps Engineer Nanodegree Project
 
-This project was completed for the Udacity Cloud DevOps Engineer Nanodegree, Deploy Infrastructre as Code.
+This project was completed for the Udacity Cloud DevOps Engineer Nanodegree, Deploy Infrastructure as Code.
 
 You can find the project specifications and rubric in the information below.
 
