@@ -12,6 +12,9 @@ Parameters:
     WebServerImageId:
         Description: Fully qualified ami image id.
         Type: String
+    WebServerInstanceType:
+        Description: The instance type to use for the web servers. (t3.medium preferred)
+        Type: String
 
 Resources:
 ### SECURITY GROUPS ###
@@ -81,7 +84,7 @@ Resources:
     JumpBoxInstance:
         Type: AWS::EC2::Instance
         Properties:
-            InstanceType: t2.micro
+            InstanceType: t3.nano
             ImageId: ami-0ce21b51cb31a48b8 # Amazon Linux 2 AMI 64-Bit x86
             SubnetId:
                 Fn::ImportValue:
@@ -115,25 +118,30 @@ Resources:
             SecurityGroups:
               - Ref: WebServerSecGroup
             IamInstanceProfile: Udagram-EC2-S3-ReadOnly
-            InstanceType: t2.micro  #/fixme set to t3.small or better after testing
-            KeyName: private-server-devops-key  #/fixme remove after testing
+            InstanceType: !Ref WebServerInstanceType
+            BlockDeviceMappings:
+              - DeviceName: "/dev/sdk"
+                Ebs:
+                    VolumeSize: 10
+                    VolumeType: gp2
+    # Uncomment this to enable SSH into WebServer instances from JumpBox
+            KeyName: private-server-devops-key
             UserData:
                 Fn::Base64: !Sub |
-                  #!/bin/bash
-                  apt-get update -y
-                  apt-get upgrade -y
-                  apt install apache2 -y
-                  apt systemctl start apache2.service
-                  apt install awscli -y
-                  apt install unzip -y
-                  cd /var/www
-                  rm -rf html
-                  mkdir html
-                  cd html
-                  aws s3 cp s3://udagram-test-environment/udagram.zip udagram.zip
-                  unzip udagram.zip
-                  rm udagram.zip
-                  chown -R ubuntu *
+                    #!/bin/bash
+                    apt-get update -y
+                    apt install apache2 -y
+                    apt systemctl start apache2.service
+                    apt install awscli -y
+                    apt install unzip -y
+                    cd /var/www
+                    rm -rf html
+                    mkdir html
+                    cd html
+                    aws s3 cp s3://udagram-test-environment/udagram.zip udagram.zip
+                    unzip udagram.zip
+                    rm udagram.zip
+                    chown -R ubuntu *
 
     WebServerGroup:
         Type: AWS::AutoScaling::AutoScalingGroup

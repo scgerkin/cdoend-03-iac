@@ -11,5 +11,9 @@
         "ParameterKey": "WebServerImageId",
         "ParameterValue": "ami-0d1cd67c26f5fca19",
         "ResolvedValue": "Ubuntu Server 18.04 LTS"
+    },
+    {
+        "ParameterKey": "WebServerInstanceType",
+        "ParameterValue": "t3.medium"
     }
 ]
