@@ -4,10 +4,6 @@ This project was completed for the Udacity Cloud DevOps Engineer Nanodegree, Dep
 
 You can find the project specifications and rubric in the information below.
 
-## LoadBalancer DNS
-The app can be accessed using the LoadBalancer DNS provided here (while the stack is still active):
-[http://serve-webse-jaorls8qv01c-258823453.us-west-2.elb.amazonaws.com/](http://serve-webse-jaorls8qv01c-258823453.us-west-2.elb.amazonaws.com/)
-
 ## Diagram Model
 The overall infrastructure model can be visualized by following this diagram:
 ![Infrastructure Diagram](./resources/imgs/udagram-infra.png)
